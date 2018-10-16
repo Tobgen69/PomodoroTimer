@@ -1,6 +1,8 @@
 # Don't track content of these folders
 Archiv/
 .vscode/
+.dist/
+.build/
 
 # Compiled source #
 ###################
@@ -23,3 +25,7 @@ Archiv/
 *.rar
 *.tar
 *.zip
+
+# Other files # 
+###############
+Pomodoro.spec
