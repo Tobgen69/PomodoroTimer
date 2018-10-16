@@ -25,8 +25,8 @@ import tkinter as tk
 #from tkinter import messagebox 
 from datetime import datetime, date, timedelta
 import winsound # for the beep sound
-#import sqlite3  # for saving data to a database
-#from time import mktime # needed for appropriate unix time..
+import sqlite3  # for saving data to a database
+from time import mktime # needed for appropriate unix time..
 
 
 class Application(tk.Frame): # initialize a class to use later to create the application
@@ -41,7 +41,7 @@ class Application(tk.Frame): # initialize a class to use later to create the app
 
         tk.Frame.__init__(self, master) # ?? sets up the frame and shows/packs it
         self.pack()
-
+        
         # Default attributes: // instead of global variables, no global because shall be possible to change
         self.pomo_run = 25*60  #/250 # /250 for testing purposes
         self.pomo_small = 5*60 #/250
@@ -49,12 +49,12 @@ class Application(tk.Frame): # initialize a class to use later to create the app
         self.pomo_counter = 0
 
         self.pomos_finished = 0
-        self.pause = False # initialize pause mode
+        self.t_pause = False # initialize pause mode
         self.t_end = 0 # initialize t_end
         self.t_pause_start = 0
         self.t_pause_end = 0
         self.t_pause_duration = timedelta(seconds = 0) # initialize t_pause_start for safe time when pause was started
-
+      
         tk.Label(self, text = "Pomodoro Time in minutes:", font=("Helvetica", 22)).pack()
         self.timer_display = tk.StringVar() # initialize variable to display
         self.timer_display.set('Start below') # set default value if no update happend
@@ -66,6 +66,8 @@ class Application(tk.Frame): # initialize a class to use later to create the app
         tk.Button(self, text='Start Countdown', command=self.CountdownButton).pack() # create CountdownButton
         tk.Button(self, text='Pause', command = self.pause).pack() # create PauseButton
         tk.Button(self, text='Exit', width = 10, bg = '#FF8080', command=root.destroy).pack() # create exit button
+
+        #messagebox.showinfo("Welcome", "Click on \"Start Countdown\" to start the Pomodoro cycle. ") # tutorial mode, don't show why in dev
 
         # ENTRY FIELDS
         tk.Label(self, text = "Set Pomodoro runtime:(sec) ").pack(side = "top")
@@ -80,10 +82,6 @@ class Application(tk.Frame): # initialize a class to use later to create the app
         self.pomo_big_custom = tk.StringVar(value = self.pomo_big)
         self.entry_pomo_big = tk.Entry(self, textvariable = self.pomo_big_custom).pack(side = "top")
 
-        #messagebox.showinfo("Welcome", "Click on \"Start Countdown\" to start the Pomodoro cycle. ") # tutorial mode, don't show why in dev
-
-
-
       
     def CountdownRun(self):
         """
@@ -94,11 +92,11 @@ class Application(tk.Frame): # initialize a class to use later to create the app
         t_delta = self.t_end - t_current
         t_delta_display = str(t_delta)[:-7] # don't show decimal seconds
 
-        if t_delta.total_seconds()>=0 and self.pause == False:  
+        if t_delta.total_seconds()>=0 and self.t_pause == False:  
             self.timer_display.set(t_delta_display)
             self.after(100, self.CountdownRun) # the .after of tkinter can take additional arguments for the function which is to call
-        elif self.pause == True:
-            print('Pause')
+        elif self.t_pause == True:
+            pass
         else: 
             t_delta_display = str(timedelta(seconds = 0))[:-7] # set timer to 0, otherwise it is negative
             self.pomos_finished = 1 + int(self.pomo_counter/2) # can bet set to a label later to display in App # int floors doubles --> int(0.5)=0
@@ -134,7 +132,7 @@ class Application(tk.Frame): # initialize a class to use later to create the app
 
         self.timer_display.set(t_delta_display)
 
-        #insert_pomo_actions(t_start, 't_start_date')
+        insert_pomo_actions(t_start, 't_start_date')
         self.CountdownRun()
 
     def beep(self):
@@ -147,12 +145,11 @@ class Application(tk.Frame): # initialize a class to use later to create the app
         """
         Makes it possible to pause/unpause the pomodoro or break.
         """ 
-        print('Pause button pressed')   
-        if self.pause == False:
-            self.pause = True
+        if self.t_pause == False:
+            self.t_pause = True
             self.t_pause_start = datetime.now()
-        elif self.pause == True:
-            self.pause = False
+        elif self.t_pause == True:
+            self.t_pause = False
             self.t_pause_end = datetime.now()
             self.t_pause_duration = self.t_pause_end - self.t_pause_start
             self.t_end = self.t_end + self.t_pause_duration
@@ -162,19 +159,19 @@ class Application(tk.Frame): # initialize a class to use later to create the app
 
 
 #### Methods realted to saving the data into the database (possibly put out of this file?)
-# def insert_pomo_actions(ts, type = 'DEFAULT'):
-#     unix = mktime(ts.timetuple())
-#     date = str(datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
-#     c.execute("INSERT INTO pomodoroRuns (unix, datestamp, type) VALUES (?, ?, ?)", (unix, date, type))
-#     conn.commit()
+def insert_pomo_actions(ts, type = 'DEFAULT'):
+    unix = mktime(ts.timetuple())
+    date = str(datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
+    c.execute("INSERT INTO pomodoroRuns (unix, datestamp, type) VALUES (?, ?, ?)", (unix, date, type))
+    conn.commit()
        
 
 root = tk.Tk() # initialize main tk-window of an application
 root.wm_title('Pomodoro Timer by Tobias Genz') # set title
 app = Application(master=root) # initialize app object
 
-#conn = sqlite3.connect('Pomodoro.db') # if it doesn't exist, SQLite will create this file/db
-#c = conn.cursor() # defines the cursor, which is the "thing" that does all the stuff (executions etc.)
+conn = sqlite3.connect('Pomodoro.db') # if it doesn't exist, SQLite will create this file/db
+c = conn.cursor() # defines the cursor, which is the "thing" that does all the stuff (executions etc.)
 
 root.mainloop()
 
