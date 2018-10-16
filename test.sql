@@ -1,6 +1,7 @@
-SELECT * 
+SELECT * , rowid
 FROM pomodoroRuns
-WHERE unix >1000
+order by type desc
+
 ;
 
 --- execute with STRG+ SHIFT + Q

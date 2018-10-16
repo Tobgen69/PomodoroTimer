@@ -24,7 +24,9 @@ create executable with pyinstaller --noconsole Pomodoro.py in cmd
 import tkinter as tk
 #from tkinter import messagebox 
 from datetime import datetime, date, timedelta
-import winsound # for the beep soundg
+import winsound # for the beep sound
+#import sqlite3  # for saving data to a database
+#from time import mktime # needed for appropriate unix time..
 
 
 class Application(tk.Frame): # initialize a class to use later to create the application
@@ -96,7 +98,7 @@ class Application(tk.Frame): # initialize a class to use later to create the app
             self.timer_display.set(t_delta_display)
             self.after(100, self.CountdownRun) # the .after of tkinter can take additional arguments for the function which is to call
         elif self.pause == True:
-            pass
+            print('Pause')
         else: 
             t_delta_display = str(timedelta(seconds = 0))[:-7] # set timer to 0, otherwise it is negative
             self.pomos_finished = 1 + int(self.pomo_counter/2) # can bet set to a label later to display in App # int floors doubles --> int(0.5)=0
@@ -125,12 +127,14 @@ class Application(tk.Frame): # initialize a class to use later to create the app
             runtime_period = self.pomo_small
         else:
             print('Something is wrong with CountdownButton-Else') # better: some proper exception handling
-            
+
         self.t_end = datetime.now() + timedelta(seconds = runtime_period)
         t_delta = self.t_end - t_start 
         t_delta_display = str(t_delta)
 
         self.timer_display.set(t_delta_display)
+
+        #insert_pomo_actions(t_start, 't_start_date')
         self.CountdownRun()
 
     def beep(self):
@@ -142,7 +146,8 @@ class Application(tk.Frame): # initialize a class to use later to create the app
     def pause(self):
         """
         Makes it possible to pause/unpause the pomodoro or break.
-        """    
+        """ 
+        print('Pause button pressed')   
         if self.pause == False:
             self.pause = True
             self.t_pause_start = datetime.now()
@@ -154,10 +159,22 @@ class Application(tk.Frame): # initialize a class to use later to create the app
             self.CountdownRun()
         else:
             print("something is wrong with Pause-Else")
-        
+
+
+#### Methods realted to saving the data into the database (possibly put out of this file?)
+# def insert_pomo_actions(ts, type = 'DEFAULT'):
+#     unix = mktime(ts.timetuple())
+#     date = str(datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
+#     c.execute("INSERT INTO pomodoroRuns (unix, datestamp, type) VALUES (?, ?, ?)", (unix, date, type))
+#     conn.commit()
+       
 
 root = tk.Tk() # initialize main tk-window of an application
 root.wm_title('Pomodoro Timer by Tobias Genz') # set title
 app = Application(master=root) # initialize app object
 
+#conn = sqlite3.connect('Pomodoro.db') # if it doesn't exist, SQLite will create this file/db
+#c = conn.cursor() # defines the cursor, which is the "thing" that does all the stuff (executions etc.)
+
 root.mainloop()
+
