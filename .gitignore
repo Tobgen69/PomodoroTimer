@@ -1,8 +1,9 @@
 # Don't track content of these folders
 Archiv/
 .vscode/
-.dist/
-.build/
+dist/
+build/
+__pycache__
 
 # Compiled source #
 ###################
