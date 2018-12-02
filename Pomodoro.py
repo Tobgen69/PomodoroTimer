@@ -18,7 +18,8 @@ https://www.tutorialspoint.com/python/python_gui_programming.htm
 http://effbot.org/tkinterbook/
 
 
-create executable with pyinstaller --noconsole Pomodoro.py in cmd
+create executable with pyinstaller --noconsole Pomodoro.py --add-data ".\Success_sound.wav;." in cmd
+whereby the ;. is used for the destination and .\Success_sound.wav is the source
 """
 
 import tkinter as tk
@@ -85,6 +86,7 @@ class Application(tk.Frame): # initialize a class to use later to create the app
         self.pomo_big_custom = tk.StringVar(value = self.pomo_big)
         self.entry_pomo_big = tk.Entry(self, textvariable = self.pomo_big_custom).pack(side = "top")
 
+        
       
     def CountdownRun(self):
         """
@@ -149,8 +151,8 @@ class Application(tk.Frame): # initialize a class to use later to create the app
     def beep(self):
         """ 
         Makes a sound. Used to make sound when Pomodoro is finished.
-        """
-        winsound.MessageBeep()    
+        """   
+        winsound.PlaySound("./Success_sound.wav",winsound.SND_ASYNC)
 
     def pause(self):
         """
